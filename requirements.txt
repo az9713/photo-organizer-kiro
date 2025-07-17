@@ -1,0 +1,19 @@
+# Core dependencies
+pillow>=9.0.0  # Image processing
+exifread>=3.0.0  # EXIF metadata extraction
+geopy>=2.3.0  # Geocoding services
+numpy>=1.22.0  # Numerical operations
+opencv-python>=4.6.0  # Computer vision
+tensorflow>=2.9.0  # Machine learning for image analysis
+scikit-learn>=1.1.0  # Machine learning utilities
+
+# GUI dependencies
+PyQt6>=6.3.0  # GUI framework
+
+# Development dependencies
+pytest>=7.0.0  # Testing framework
+pytest-mock>=3.8.0  # Mocking for tests
+flake8>=5.0.0  # Linting
+black>=22.6.0  # Code formatting
+isort>=5.10.0  # Import sorting
+mypy>=0.971  # Type checking

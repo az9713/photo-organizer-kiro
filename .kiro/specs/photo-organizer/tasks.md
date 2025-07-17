@@ -2,7 +2,8 @@
 
 > **Note:** After completing each subtask, create a git commit with a descriptive message that references the task number.
 
-- [ ] 1. Set up project structure and environment
+- [-] 1. Set up project structure and environment
+
   - Create directory structure for modules
   - Set up virtual environment and dependencies
   - Configure development tools (linting, testing)
