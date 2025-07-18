@@ -18,6 +18,7 @@ from photo_organizer.services.file_operations import FileOperationsService
 from photo_organizer.services.file_system_manager import FileSystemManager
 from photo_organizer.services.report_export import ReportExportService
 from photo_organizer.services.reporting import FileMapping, FolderNode, Report, ReportFormat, ReportingService
+from photo_organizer.state import ProcessingState, StateChangeEvent, StateManager
 from photo_organizer.ui.cli_progress import CLIProgressReporter, ProcessingStage
 
 
@@ -49,7 +50,11 @@ class ApplicationCore:
         self.report_export_service = ReportExportService()
         self.file_mapping_service = FileMappingService()
         
-        # State
+        # State management
+        self.state_manager = StateManager()
+        self._setup_state_callbacks()
+        
+        # Legacy state variables (for backward compatibility)
         self.canceled = False
         self.paused = False
         self.current_stage = None
@@ -60,6 +65,44 @@ class ApplicationCore:
         
         if parallel_processing:
             self._init_task_scheduler(max_workers)
+    
+    def _setup_state_callbacks(self) -> None:
+        """Set up callbacks for state changes."""
+        # Register state change callbacks
+        self.state_manager.register_state_change_callback(
+            ProcessingState.RUNNING,
+            lambda: self._log_info("Processing started")
+        )
+        self.state_manager.register_state_change_callback(
+            ProcessingState.PAUSED,
+            lambda: self._log_info("Processing paused")
+        )
+        self.state_manager.register_state_change_callback(
+            ProcessingState.CANCELING,
+            lambda: self._log_info("Processing canceling...")
+        )
+        self.state_manager.register_state_change_callback(
+            ProcessingState.COMPLETED,
+            lambda: self._log_info("Processing completed")
+        )
+        self.state_manager.register_state_change_callback(
+            ProcessingState.FAILED,
+            lambda: self._log_info("Processing failed")
+        )
+        
+        # Register event callbacks
+        self.state_manager.register_event_callback(
+            StateChangeEvent.PAUSE,
+            lambda: setattr(self, "paused", True)
+        )
+        self.state_manager.register_event_callback(
+            StateChangeEvent.RESUME,
+            lambda: setattr(self, "paused", False)
+        )
+        self.state_manager.register_event_callback(
+            StateChangeEvent.CANCEL,
+            lambda: setattr(self, "canceled", True)
+        )
     
     def _init_task_scheduler(self, max_workers: int) -> None:
         """
@@ -103,6 +146,11 @@ class ApplicationCore:
             # Reset state
             self.canceled = False
             self.paused = False
+            
+            # Start processing
+            if not self.state_manager.transition(StateChangeEvent.START):
+                self._log_warning("Cannot start processing in current state")
+                return False, None
             
             # Configure parallel processing
             parallel_processing = options.get("parallel_processing", self.parallel_processing)
@@ -202,26 +250,39 @@ class ApplicationCore:
             if self.progress_reporter.errors:
                 self._log_info(f"Encountered {len(self.progress_reporter.errors)} errors")
             
+            # Update state
+            self.state_manager.transition(StateChangeEvent.COMPLETE)
+            
             return True, report
             
         except Exception as e:
             self._log_error(f"Error during processing: {e}")
+            
+            # Update state
+            self.state_manager.transition(StateChangeEvent.FAIL)
+            
             return False, None
     
     def cancel(self) -> None:
         """Cancel processing."""
-        self.canceled = True
-        self._log_info("Canceling operation...")
+        if self.state_manager.can_cancel():
+            self.state_manager.transition(StateChangeEvent.CANCEL)
+        else:
+            self._log_warning("Cannot cancel processing in current state")
     
     def pause(self) -> None:
         """Pause processing."""
-        self.paused = True
-        self._log_info("Pausing operation...")
+        if self.state_manager.can_pause():
+            self.state_manager.transition(StateChangeEvent.PAUSE)
+        else:
+            self._log_warning("Cannot pause processing in current state")
     
     def resume(self) -> None:
         """Resume processing."""
-        self.paused = False
-        self._log_info("Resuming operation...")
+        if self.state_manager.can_resume():
+            self.state_manager.transition(StateChangeEvent.RESUME)
+        else:
+            self._log_warning("Cannot resume processing in current state")
     
     def _validate_paths(self, input_paths: List[str], output_path: str) -> None:
         """

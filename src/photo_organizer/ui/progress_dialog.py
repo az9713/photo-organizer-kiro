@@ -18,19 +18,29 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from photo_organizer.state import ProcessingState
 from photo_organizer.ui.cli_progress import ProcessingStage
+from photo_organizer.ui.state_monitor import StateMonitor
 
 
 class ProgressDialog(QDialog):
     """Dialog for displaying progress of operations."""
     
-    def __init__(self, parent=None) -> None:
-        """Initialize the progress dialog."""
+    def __init__(self, state_monitor: StateMonitor, parent=None) -> None:
+        """
+        Initialize the progress dialog.
+        
+        Args:
+            state_monitor: Monitor for application state
+            parent: Parent widget
+        """
         super().__init__(parent)
         
         self.setWindowTitle("Processing Images")
         self.setMinimumSize(500, 400)
         self.setModal(True)
+        
+        self.state_monitor = state_monitor
         
         self._create_layout()
         self._setup_connections()
@@ -91,26 +101,81 @@ class ProgressDialog(QDialog):
     
     def _setup_connections(self) -> None:
         """Set up signal connections."""
-        # These will be connected to the worker thread
-        pass
+        # Connect state monitor signals
+        self.state_monitor.state_changed.connect(self._on_state_changed)
+        self.state_monitor.progress_updated.connect(self._on_progress_updated)
+        self.state_monitor.message_logged.connect(self.log_message)
+        self.state_monitor.error_logged.connect(self.log_error)
+        self.state_monitor.warning_logged.connect(self.log_warning)
+    
+    def _on_state_changed(self, state: ProcessingState) -> None:
+        """
+        Handle state changes.
+        
+        Args:
+            state: New state
+        """
+        if state == ProcessingState.RUNNING:
+            self.status_label.setText("Processing: Running")
+            self.cancel_button.setEnabled(True)
+            self.pause_button.setEnabled(True)
+            self.pause_button.setText("Pause")
+            self.close_button.setEnabled(False)
+        elif state == ProcessingState.PAUSED:
+            self.status_label.setText("Processing: Paused")
+            self.cancel_button.setEnabled(True)
+            self.pause_button.setEnabled(True)
+            self.pause_button.setText("Resume")
+            self.close_button.setEnabled(False)
+        elif state == ProcessingState.CANCELING:
+            self.status_label.setText("Processing: Canceling...")
+            self.cancel_button.setEnabled(False)
+            self.pause_button.setEnabled(False)
+            self.close_button.setEnabled(False)
+        elif state == ProcessingState.COMPLETED:
+            self.status_label.setText("Processing: Completed")
+            self.cancel_button.setEnabled(False)
+            self.pause_button.setEnabled(False)
+            self.close_button.setEnabled(True)
+            self.complete()
+        elif state == ProcessingState.FAILED:
+            self.status_label.setText("Processing: Failed")
+            self.cancel_button.setEnabled(False)
+            self.pause_button.setEnabled(False)
+            self.close_button.setEnabled(True)
+    
+    def _on_progress_updated(self, name: str, value: int, total: int) -> None:
+        """
+        Handle progress updates.
+        
+        Args:
+            name: Name of the progress
+            value: Current progress value
+            total: Total progress value
+        """
+        if name == "overall":
+            self.update_progress(value, total)
+        else:
+            self.update_stage_progress(value, total)
     
     def _on_cancel(self) -> None:
         """Handle the Cancel button."""
         self.canceled = True
         self.log_output.append("Canceling operation...")
+        self.state_monitor.cancel_processing()
         self.cancel_button.setEnabled(False)
         self.pause_button.setEnabled(False)
     
     def _on_pause(self) -> None:
         """Handle the Pause button."""
         if self.pause_button.text() == "Pause":
+            self.state_monitor.pause_processing()
             self.pause_button.setText("Resume")
             self.log_output.append("Operation paused")
-            # TODO: Implement pausing
         else:
+            self.state_monitor.resume_processing()
             self.pause_button.setText("Pause")
             self.log_output.append("Operation resumed")
-            # TODO: Implement resuming
     
     def update_progress(self, value: int, maximum: int = 100) -> None:
         """
@@ -373,6 +438,8 @@ class ProgressManager:
         self.dialog = None
         self.thread = None
         self.worker = None
+        self.app_core = None
+        self.state_monitor = None
     
     def start_processing(self, input_paths: List[str], output_path: str, options: Dict) -> None:
         """
@@ -383,29 +450,36 @@ class ProgressManager:
             output_path: Output directory path
             options: Processing options
         """
-        # Create dialog
-        self.dialog = ProgressDialog(self.parent)
+        # Store parameters
+        self.input_paths = input_paths
+        self.output_path = output_path
+        self.options = options
         
-        # Create worker and thread
+        # Create application core
+        from photo_organizer.core import ApplicationCore
+        
+        self.app_core = ApplicationCore(
+            parallel_processing=options.get("parallel_processing", False),
+            max_workers=options.get("max_workers", 4),
+        )
+        
+        # Create state monitor
+        from photo_organizer.ui.state_monitor import StateMonitor
+        
+        self.state_monitor = StateMonitor(self.app_core)
+        
+        # Create dialog
+        self.dialog = ProgressDialog(self.state_monitor, self.parent)
+        
+        # Create thread for processing
         self.thread = QThread()
-        self.worker = ProgressWorker(input_paths, output_path, options)
+        
+        # Create worker for processing
+        self.worker = QObject()
         self.worker.moveToThread(self.thread)
         
-        # Connect signals
-        self.thread.started.connect(self.worker.process)
-        self.worker.progress_updated.connect(self.dialog.update_progress)
-        self.worker.stage_progress_updated.connect(self.dialog.update_stage_progress)
-        self.worker.stage_changed.connect(self.dialog.set_stage)
-        self.worker.message_logged.connect(self.dialog.log_message)
-        self.worker.error_logged.connect(self.dialog.log_error)
-        self.worker.warning_logged.connect(self.dialog.log_warning)
-        self.worker.processing_completed.connect(self.dialog.complete)
-        self.worker.processing_completed.connect(self.thread.quit)
-        self.worker.processing_canceled.connect(self.thread.quit)
-        
-        # Connect dialog buttons
-        self.dialog.cancel_button.clicked.connect(self.worker.cancel)
-        self.dialog.pause_button.clicked.connect(self._toggle_pause)
+        # Connect thread signals
+        self.thread.started.connect(self._process)
         
         # Start processing
         self.thread.start()
@@ -415,13 +489,27 @@ class ProgressManager:
         
         # Clean up
         if self.thread.isRunning():
-            self.worker.cancel()
+            self.app_core.cancel()
             self.thread.quit()
             self.thread.wait()
     
-    def _toggle_pause(self) -> None:
-        """Toggle pause/resume state."""
-        if self.dialog.pause_button.text() == "Pause":
-            self.worker.pause()
-        else:
-            self.worker.resume()
+    @pyqtSlot()
+    def _process(self) -> None:
+        """Process the images."""
+        try:
+            # Process images
+            success, report = self.app_core.process_images(
+                self.input_paths,
+                self.output_path,
+                self.options,
+            )
+            
+            # Quit thread
+            self.thread.quit()
+            
+        except Exception as e:
+            # Log error
+            self.state_monitor.error_logged.emit(f"Error during processing: {e}")
+            
+            # Quit thread
+            self.thread.quit()
