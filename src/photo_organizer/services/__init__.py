@@ -8,6 +8,12 @@ from photo_organizer.services.file_system_manager import (
     FileSystemError,
     FileSystemManager,
 )
+from photo_organizer.services.geolocation import (
+    GeocodingError,
+    GeocodingService,
+    MockGeocodingService,
+    NominatimGeocodingService,
+)
 from photo_organizer.services.image_format import ImageFormatError, ImageFormatService
 from photo_organizer.services.metadata_extractor import (
     ExifMetadataExtractor,
@@ -26,4 +32,8 @@ __all__ = [
     "MetadataExtractor",
     "ExifMetadataExtractor",
     "MetadataExtractionError",
+    "GeocodingService",
+    "NominatimGeocodingService",
+    "MockGeocodingService",
+    "GeocodingError",
 ]
