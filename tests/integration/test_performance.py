@@ -13,6 +13,11 @@ from photo_organizer.ui.cli_progress import CLIProgressReporter
 from tests.integration.test_dataset import test_dataset
 
 
+# Skip these tests by default as they are resource-intensive
+# Run with pytest -m performance to include them
+pytestmark = pytest.mark.performance
+
+
 class TestPerformance:
     """Performance tests for the Photo Organizer application."""
     
