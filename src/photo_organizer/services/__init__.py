@@ -8,6 +8,7 @@ from photo_organizer.services.file_system_manager import (
     FileSystemError,
     FileSystemManager,
 )
+from photo_organizer.services.image_format import ImageFormatError, ImageFormatService
 
 __all__ = [
     "FileSystemManager",
@@ -15,4 +16,6 @@ __all__ = [
     "FileSystemError",
     "FileOperations",
     "FileOperationResult",
+    "ImageFormatService",
+    "ImageFormatError",
 ]
