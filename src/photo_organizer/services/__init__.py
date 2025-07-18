@@ -9,6 +9,11 @@ from photo_organizer.services.file_system_manager import (
     FileSystemManager,
 )
 from photo_organizer.services.image_format import ImageFormatError, ImageFormatService
+from photo_organizer.services.metadata_extractor import (
+    ExifMetadataExtractor,
+    MetadataExtractionError,
+    MetadataExtractor,
+)
 
 __all__ = [
     "FileSystemManager",
@@ -18,4 +23,7 @@ __all__ = [
     "FileOperationResult",
     "ImageFormatService",
     "ImageFormatError",
+    "MetadataExtractor",
+    "ExifMetadataExtractor",
+    "MetadataExtractionError",
 ]
