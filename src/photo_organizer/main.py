@@ -44,7 +44,11 @@ def main():
         # Create application core
         from photo_organizer.core import ApplicationCore
         
-        app_core = ApplicationCore(reporter)
+        app_core = ApplicationCore(
+            reporter,
+            parallel_processing=options.get("parallel_processing", False),
+            max_workers=options.get("max_workers", 4),
+        )
         
         try:
             # Process images

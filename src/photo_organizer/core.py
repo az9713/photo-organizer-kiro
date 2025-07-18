@@ -10,6 +10,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 from photo_organizer.models.category import Category
 from photo_organizer.models.category_tree import CategoryTree
 from photo_organizer.models.image import Image, ImageFormat
+from photo_organizer.parallel import TaskScheduler
 from photo_organizer.services.analysis import ImageAnalysisService
 from photo_organizer.services.categorization import CategorizationService
 from photo_organizer.services.file_mapping import FileMappingService
@@ -23,12 +24,19 @@ from photo_organizer.ui.cli_progress import CLIProgressReporter, ProcessingStage
 class ApplicationCore:
     """Core application logic for the Photo Organizer application."""
     
-    def __init__(self, progress_reporter: Optional[CLIProgressReporter] = None) -> None:
+    def __init__(
+        self,
+        progress_reporter: Optional[CLIProgressReporter] = None,
+        parallel_processing: bool = False,
+        max_workers: int = 4,
+    ) -> None:
         """
         Initialize the application core.
         
         Args:
             progress_reporter: Reporter for progress updates
+            parallel_processing: Whether to use parallel processing
+            max_workers: Maximum number of worker threads for parallel processing
         """
         self.progress_reporter = progress_reporter or CLIProgressReporter()
         
@@ -45,6 +53,32 @@ class ApplicationCore:
         self.canceled = False
         self.paused = False
         self.current_stage = None
+        
+        # Parallel processing
+        self.parallel_processing = parallel_processing
+        self.max_workers = max_workers
+        
+        if parallel_processing:
+            self._init_task_scheduler(max_workers)
+    
+    def _init_task_scheduler(self, max_workers: int) -> None:
+        """
+        Initialize the task scheduler for parallel processing.
+        
+        Args:
+            max_workers: Maximum number of worker threads
+        """
+        # Create progress callback
+        def progress_callback(name: str, processed: int, total: int) -> None:
+            self.progress_reporter.update_progress(name, processed)
+        
+        # Create task scheduler
+        self.task_scheduler = TaskScheduler(
+            max_workers=max_workers,
+            progress_callback=progress_callback,
+            cancel_check=lambda: self.canceled,
+            pause_check=lambda: self.paused,
+        )
     
     def process_images(
         self,
@@ -69,6 +103,13 @@ class ApplicationCore:
             # Reset state
             self.canceled = False
             self.paused = False
+            
+            # Configure parallel processing
+            parallel_processing = options.get("parallel_processing", self.parallel_processing)
+            max_workers = options.get("max_workers", self.max_workers)
+            
+            if parallel_processing and not hasattr(self, "task_scheduler"):
+                self._init_task_scheduler(max_workers)
             
             # Validate paths
             self._validate_paths(input_paths, output_path)
@@ -298,10 +339,30 @@ class ApplicationCore:
         Returns:
             List of analyzed Image objects
         """
-        images = []
         total_images = len(image_paths)
         
         self.progress_reporter.start_progress("analyze", total_images, "Analyzing images")
+        
+        # Check if parallel processing is enabled
+        if hasattr(self, "task_scheduler") and self.task_scheduler:
+            # Use parallel processing
+            return self._analyze_images_parallel(image_paths)
+        else:
+            # Use sequential processing
+            return self._analyze_images_sequential(image_paths)
+    
+    def _analyze_images_sequential(self, image_paths: List[str]) -> List[Image]:
+        """
+        Analyze images sequentially.
+        
+        Args:
+            image_paths: List of image file paths
+            
+        Returns:
+            List of analyzed Image objects
+        """
+        images = []
+        total_images = len(image_paths)
         
         for i, path in enumerate(image_paths):
             # Check for cancellation or pause
@@ -327,6 +388,41 @@ class ApplicationCore:
             self.progress_reporter.update_progress("analyze", i + 1)
         
         return images
+    
+    def _analyze_images_parallel(self, image_paths: List[str]) -> List[Image]:
+        """
+        Analyze images in parallel.
+        
+        Args:
+            image_paths: List of image file paths
+            
+        Returns:
+            List of analyzed Image objects
+        """
+        def analyze_image(path: str) -> Optional[Image]:
+            """Analyze a single image."""
+            try:
+                # Create Image object
+                image = Image(path)
+                
+                # Analyze image content
+                self.analysis_service.analyze_image(image)
+                
+                return image
+                
+            except Exception as e:
+                self._log_error(f"Error analyzing image {path}: {e}", path)
+                return None
+        
+        # Process images in parallel
+        results = self.task_scheduler.process_batch(
+            "analyze",
+            analyze_image,
+            image_paths,
+        )
+        
+        # Filter out None results (failed analyses)
+        return [image for image in results if image is not None]
     
     def _categorize_images(
         self,
@@ -378,10 +474,37 @@ class ApplicationCore:
         Returns:
             List of organized Image objects
         """
-        organized_images = []
         total_images = len(images)
         
         self.progress_reporter.start_progress("organize", total_images, "Organizing images")
+        
+        # Check if parallel processing is enabled
+        if hasattr(self, "task_scheduler") and self.task_scheduler:
+            # Use parallel processing
+            return self._organize_images_parallel(images, category_tree, output_path)
+        else:
+            # Use sequential processing
+            return self._organize_images_sequential(images, category_tree, output_path)
+    
+    def _organize_images_sequential(
+        self,
+        images: List[Image],
+        category_tree: CategoryTree,
+        output_path: str,
+    ) -> List[Image]:
+        """
+        Organize images sequentially.
+        
+        Args:
+            images: List of Image objects
+            category_tree: CategoryTree with categorized images
+            output_path: Output directory path
+            
+        Returns:
+            List of organized Image objects
+        """
+        organized_images = []
+        total_images = len(images)
         
         for i, image in enumerate(images):
             # Check for cancellation or pause
@@ -428,6 +551,74 @@ class ApplicationCore:
             self.progress_reporter.update_progress("organize", i + 1)
         
         return organized_images
+    
+    def _organize_images_parallel(
+        self,
+        images: List[Image],
+        category_tree: CategoryTree,
+        output_path: str,
+    ) -> List[Image]:
+        """
+        Organize images in parallel.
+        
+        Args:
+            images: List of Image objects
+            category_tree: CategoryTree with categorized images
+            output_path: Output directory path
+            
+        Returns:
+            List of organized Image objects
+        """
+        # Create a lock for directory creation
+        dir_lock = threading.Lock()
+        
+        def organize_image(image: Image) -> Optional[Image]:
+            """Organize a single image."""
+            try:
+                # Get categories for image
+                categories = category_tree.get_category_for_image(image.id)
+                
+                if not categories:
+                    self._log_warning(f"No categories found for image: {image.path}")
+                    return None
+                
+                # Use the first category (most specific)
+                category = categories[0]
+                
+                # Get category path
+                category_path = category_tree.get_category_path_names(category.id)
+                
+                # Create output directory (with lock to avoid race conditions)
+                rel_dir_path = os.path.join(*category_path) if category_path else ""
+                dir_path = os.path.join(output_path, rel_dir_path)
+                
+                with dir_lock:
+                    os.makedirs(dir_path, exist_ok=True)
+                
+                # Generate new filename
+                new_filename = self._generate_filename(image, category)
+                new_path = os.path.join(dir_path, new_filename)
+                
+                # Copy file
+                self.file_operations.copy_file(str(image.path), new_path)
+                
+                # Update image with new path
+                image.new_path = Path(new_path)
+                return image
+                
+            except Exception as e:
+                self._log_error(f"Error organizing image {image.path}: {e}", str(image.path))
+                return None
+        
+        # Process images in parallel
+        results = self.task_scheduler.process_batch(
+            "organize",
+            organize_image,
+            images,
+        )
+        
+        # Filter out None results (failed organizations)
+        return [image for image in results if image is not None]
     
     def _generate_filename(self, image: Image, category: Category) -> str:
         """
