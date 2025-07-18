@@ -20,6 +20,14 @@ from photo_organizer.services.metadata_extractor import (
     MetadataExtractionError,
     MetadataExtractor,
 )
+from photo_organizer.services.vision import (
+    ComputerVisionError,
+    ComputerVisionService,
+    FaceInfo,
+    ObjectInfo,
+    SceneInfo,
+    TensorFlowVisionService,
+)
 
 __all__ = [
     "FileSystemManager",
@@ -36,4 +44,10 @@ __all__ = [
     "NominatimGeocodingService",
     "MockGeocodingService",
     "GeocodingError",
+    "ComputerVisionService",
+    "TensorFlowVisionService",
+    "ComputerVisionError",
+    "ObjectInfo",
+    "SceneInfo",
+    "FaceInfo",
 ]
