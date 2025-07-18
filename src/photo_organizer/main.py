@@ -3,49 +3,30 @@
 Main entry point for the Photo Organizer application.
 """
 
-import argparse
 import sys
 from pathlib import Path
 
-
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Photo Organizer - Intelligently organize and rename image files."
-    )
-    parser.add_argument(
-        "input_path",
-        type=str,
-        help="Path to input file or directory containing images to organize",
-    )
-    parser.add_argument(
-        "output_path",
-        type=str,
-        help="Path to output directory where organized images will be stored",
-    )
-    parser.add_argument(
-        "--gui",
-        action="store_true",
-        help="Launch the graphical user interface",
-    )
-    return parser.parse_args()
+from photo_organizer.ui.cli_parser import CLIParser
 
 
 def main():
     """Main entry point for the application."""
-    args = parse_args()
+    # Parse command line arguments
+    cli_parser = CLIParser()
+    args = cli_parser.parse_args()
     
-    # Validate input path
-    input_path = Path(args.input_path)
-    if not input_path.exists():
-        print(f"Error: Input path '{input_path}' does not exist.", file=sys.stderr)
+    # Validate arguments
+    is_valid, error_message = cli_parser.validate_args(args)
+    if not is_valid:
+        print(f"Error: {error_message}", file=sys.stderr)
         return 1
     
-    # Validate output path
+    # Get processing options
+    options = cli_parser.get_processing_options(args)
+    
+    # Convert paths to Path objects
+    input_path = Path(args.input_path)
     output_path = Path(args.output_path)
-    if not output_path.exists():
-        print(f"Creating output directory: {output_path}")
-        output_path.mkdir(parents=True, exist_ok=True)
     
     if args.gui:
         # TODO: Launch GUI
@@ -53,7 +34,14 @@ def main():
         return 1
     else:
         # TODO: Run in CLI mode
-        print(f"Processing images from {input_path} to {output_path}")
+        if not options["quiet"]:
+            print(f"Processing images from {input_path} to {output_path}")
+            if options["verbose"] > 0:
+                print("Processing options:")
+                for key, value in options.items():
+                    print(f"  {key}: {value}")
+        
+        # TODO: Implement the actual processing
         print("CLI mode not yet fully implemented.")
         return 0
 
