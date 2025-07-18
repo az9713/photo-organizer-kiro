@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtGui import QAction, QCursor, QIcon
 from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -129,23 +129,29 @@ class MainWindow(QMainWindow):
         description_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(description_label)
         
-        # Buttons
-        button_layout = QHBoxLayout()
-        layout.addLayout(button_layout)
-        
-        open_button = QPushButton("Open Files...")
-        open_button.clicked.connect(self._on_open_files)
-        button_layout.addWidget(open_button)
-        
-        open_folder_button = QPushButton("Open Folder...")
-        open_folder_button.clicked.connect(self._on_open_folder)
-        button_layout.addWidget(open_folder_button)
+        # File selection widget
+        from photo_organizer.ui.file_selection import FileSelectionWidget
+        self.file_selection = FileSelectionWidget()
+        self.file_selection.selectionChanged.connect(self._on_selection_changed)
+        layout.addWidget(self.file_selection)
     
     def _on_open(self) -> None:
         """Handle the Open action."""
         self.status_label.setText("Opening files or folders...")
-        # TODO: Implement file/folder opening
-        self.status_label.setText("Ready")
+        
+        # Create a menu with options for opening files or folders
+        menu = QMenu(self)
+        
+        open_files_action = QAction("Open Files...", self)
+        open_files_action.triggered.connect(self._on_open_files)
+        menu.addAction(open_files_action)
+        
+        open_folder_action = QAction("Open Folder...", self)
+        open_folder_action.triggered.connect(self._on_open_folder)
+        menu.addAction(open_folder_action)
+        
+        # Show the menu at the cursor position
+        menu.exec(QCursor.pos())
     
     def _on_open_files(self) -> None:
         """Handle the Open Files button."""
@@ -157,8 +163,8 @@ class MainWindow(QMainWindow):
         
         if file_dialog.exec():
             file_paths = file_dialog.selectedFiles()
-            self.status_label.setText(f"Selected {len(file_paths)} files")
-            # TODO: Process selected files
+            self.file_selection._add_paths(file_paths)
+            self.status_label.setText(f"Added {len(file_paths)} files")
         else:
             self.status_label.setText("File selection canceled")
     
@@ -173,8 +179,8 @@ class MainWindow(QMainWindow):
         if folder_dialog.exec():
             folder_paths = folder_dialog.selectedFiles()
             if folder_paths:
-                self.status_label.setText(f"Selected folder: {folder_paths[0]}")
-                # TODO: Process selected folder
+                self.file_selection._add_paths(folder_paths)
+                self.status_label.setText(f"Added folder: {folder_paths[0]}")
         else:
             self.status_label.setText("Folder selection canceled")
     
@@ -201,6 +207,11 @@ class MainWindow(QMainWindow):
         self.status_label.setText("Showing about dialog...")
         # TODO: Implement about dialog
         self.status_label.setText("Ready")
+        
+    def _on_selection_changed(self) -> None:
+        """Handle changes in file selection."""
+        selected_paths = self.file_selection.get_selected_paths()
+        self.status_label.setText(f"Selected {len(selected_paths)} files")
 
 
 def run_gui() -> int:
