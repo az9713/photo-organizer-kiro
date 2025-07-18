@@ -2,6 +2,7 @@
 Services for the Photo Organizer application.
 """
 
+from photo_organizer.services.file_mapping import FileMappingService
 from photo_organizer.services.reporting import (
     FileMapping,
     FolderNode,
@@ -18,4 +19,5 @@ __all__ = [
     "FolderNode",
     "FileMapping",
     "ReportFormat",
+    "FileMappingService",
 ]
