@@ -14,6 +14,11 @@ from photo_organizer.services.vision.detection import (
     ObjectDetector,
     SceneDetector,
 )
+from photo_organizer.services.vision.similarity import (
+    FeatureExtractor,
+    ImageSimilarityService,
+    SimilarityAnalyzer,
+)
 from photo_organizer.services.vision.tensorflow import TensorFlowVisionService
 
 __all__ = [
@@ -26,4 +31,7 @@ __all__ = [
     "ObjectDetector",
     "SceneDetector",
     "DetectionService",
+    "FeatureExtractor",
+    "SimilarityAnalyzer",
+    "ImageSimilarityService",
 ]
