@@ -31,9 +31,9 @@ def main():
     output_path = Path(args.output_path)
     
     if args.gui:
-        # TODO: Launch GUI
-        print("GUI mode not yet implemented.")
-        return 1
+        # Launch GUI
+        from photo_organizer.ui.gui_app import run_gui
+        return run_gui()
     else:
         # Create progress reporter
         reporter = CLIProgressReporter(
