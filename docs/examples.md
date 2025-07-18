@@ -1,210 +1,201 @@
-# Photo Organizer Examples and Tutorials
+# Photo Organizer Examples
 
-This document provides practical examples and tutorials for using Photo Organizer in various scenarios.
+This document provides practical examples of using Photo Organizer in various scenarios.
 
 ## Basic Examples
 
-### Example 1: Organizing a Vacation Photo Collection
+### Organizing a Single Directory
 
-Suppose you have a folder of vacation photos that you want to organize:
-
-```
-photo-organizer ~/Pictures/Vacation2025 ~/Pictures/Organized_Vacation --recursive
+```bash
+photo-organizer ~/Pictures/Vacation ~/Pictures/Organized
 ```
 
 This command will:
-1. Scan all images in the Vacation2025 folder and its subfolders
-2. Analyze the content of each image
-3. Create a logical folder structure in the Organized_Vacation folder
-4. Copy and rename the images based on their content
-5. Generate an HTML report in the Organized_Vacation folder
+- Process all images in the `~/Pictures/Vacation` directory
+- Create an organized folder structure in `~/Pictures/Organized`
+- Generate a text report at `~/Pictures/Organized/report.txt`
 
-### Example 2: Organizing Photos with Custom Settings
+### Organizing Multiple Directories
 
-For more control over the organization process:
-
-```
-photo-organizer ~/Pictures/Family ~/Pictures/Organized_Family --similarity-threshold 0.8 --max-category-depth 4 --report both
+```bash
+photo-organizer ~/Pictures/Vacation ~/Pictures/Family ~/Pictures/Organized
 ```
 
 This command will:
-1. Use a higher similarity threshold (0.8) for more specific categories
-2. Create a deeper folder hierarchy (up to 4 levels)
-3. Generate both HTML and text reports
+- Process all images in both the `~/Pictures/Vacation` and `~/Pictures/Family` directories
+- Create an organized folder structure in `~/Pictures/Organized`
 
-### Example 3: Processing Large Collections
+### Organizing a Directory Tree
 
-For large photo collections, enable parallel processing:
-
-```
-photo-organizer ~/Pictures/AllPhotos ~/Pictures/Organized_All --recursive --parallel --max-workers 8
+```bash
+photo-organizer ~/Pictures ~/Pictures/Organized --recursive
 ```
 
 This command will:
-1. Process images in parallel using 8 worker threads
-2. Significantly speed up the organization process for large collections
-
-## Tutorials
-
-### Tutorial 1: Organizing Photos by Event
-
-In this tutorial, we'll organize a collection of photos from different events:
-
-1. Prepare your photos:
-   - Create a folder for each event (e.g., "Birthday", "Wedding", "Vacation")
-   - Place relevant photos in each folder
-
-2. Run Photo Organizer with recursive processing:
-   ```
-   photo-organizer ~/Pictures/Events ~/Pictures/Organized_Events --recursive
-   ```
-
-3. Review the results:
-   - Open the HTML report in your browser
-   - Check the folder structure created in the output directory
-   - Verify that photos are grouped logically
-
-4. Fine-tune if needed:
-   - If categories are too broad, increase the similarity threshold
-   - If categories are too specific, decrease the similarity threshold
-   ```
-   photo-organizer ~/Pictures/Events ~/Pictures/Organized_Events_Refined --recursive --similarity-threshold 0.75
-   ```
-
-### Tutorial 2: Creating a Photo Archive
-
-In this tutorial, we'll create a well-organized photo archive from a messy collection:
-
-1. Prepare your photos:
-   - Gather all photos you want to archive in a single location
-   - No need to pre-organize them
-
-2. Run Photo Organizer with a deep category hierarchy:
-   ```
-   photo-organizer ~/Pictures/Messy ~/Pictures/Archive --recursive --max-category-depth 5
-   ```
-
-3. Create a comprehensive report:
-   ```
-   photo-organizer ~/Pictures/Messy ~/Pictures/Archive --recursive --report both --report-path ~/Documents/photo_archive_report
-   ```
-
-4. Review and share the report:
-   - Open the HTML report in your browser
-   - Share the report with others who need to access the archive
-
-### Tutorial 3: Using the GUI for Interactive Organization
-
-In this tutorial, we'll use the graphical interface for more interactive control:
-
-1. Launch the GUI:
-   ```
-   photo-organizer --gui
-   ```
-
-2. Select input files:
-   - Drag and drop files or folders into the application window
-   - Or click "Open Files..." or "Open Folder..." to browse for files
-
-3. Configure settings:
-   - Click "Edit" > "Preferences..." to open the settings dialog
-   - Adjust similarity threshold, category depth, and other options
-   - Click "OK" to save settings
-
-4. Select output location:
-   - Click "Organize" to start the process
-   - Select an output directory when prompted
-
-5. Monitor progress:
-   - Watch the progress bar and log messages
-   - Use the "Pause" button if needed
-   - Wait for the process to complete
-
-6. Review results:
-   - The report will open automatically when processing is complete
-   - Browse the organized files in the output directory
+- Process all images in `~/Pictures` and all its subdirectories
+- Create an organized folder structure in `~/Pictures/Organized`
 
 ## Advanced Examples
 
-### Example 4: Batch Processing Multiple Collections
+### Parallel Processing for Large Collections
 
-Process multiple collections in sequence:
+```bash
+photo-organizer ~/Pictures ~/Pictures/Organized --recursive --parallel --max-workers 8
+```
+
+This command will:
+- Process all images in `~/Pictures` and all its subdirectories
+- Use parallel processing with 8 worker threads
+- Create an organized folder structure in `~/Pictures/Organized`
+
+### Custom Similarity Threshold
+
+```bash
+photo-organizer ~/Pictures ~/Pictures/Organized --similarity-threshold 0.85
+```
+
+This command will:
+- Process all images in `~/Pictures`
+- Use a higher similarity threshold (0.85 instead of the default 0.7)
+- This results in more granular categorization (fewer images per category)
+
+### Generating HTML Reports
+
+```bash
+photo-organizer ~/Pictures ~/Pictures/Organized --report html
+```
+
+This command will:
+- Process all images in `~/Pictures`
+- Generate an HTML report at `~/Pictures/Organized/report.html`
+
+### Custom Report Location
+
+```bash
+photo-organizer ~/Pictures ~/Pictures/Organized --report both --report-path ~/Documents/photo_report
+```
+
+This command will:
+- Process all images in `~/Pictures`
+- Generate both text and HTML reports at `~/Documents/photo_report.txt` and `~/Documents/photo_report.html`
+
+## GUI Examples
+
+### Basic Workflow
+
+1. Launch the GUI:
+   ```bash
+   photo-organizer --gui
+   ```
+
+2. Click "Open Folder..." and select `~/Pictures/Vacation`
+
+3. Click "Organize" and select `~/Pictures/Organized` as the output directory
+
+4. Wait for processing to complete and view the report
+
+### Drag and Drop
+
+1. Launch the GUI:
+   ```bash
+   photo-organizer --gui
+   ```
+
+2. Drag and drop image files or folders from your file explorer onto the file selection area
+
+3. Click "Organize" and select an output directory
+
+### Using Preferences
+
+1. Launch the GUI:
+   ```bash
+   photo-organizer --gui
+   ```
+
+2. Click "Edit" > "Preferences..."
+
+3. Configure options:
+   - Enable recursive processing
+   - Enable parallel processing
+   - Set max workers to 4
+   - Set similarity threshold to 0.8
+   - Select HTML report format
+
+4. Click "OK" to save preferences
+
+5. Select input files and organize as usual
+
+## Batch Processing Examples
+
+### Processing with a Script
+
+Create a batch script (`process_photos.sh` or `process_photos.bat`):
 
 ```bash
 #!/bin/bash
+# Process multiple directories in batch
 
-collections=("Vacation" "Family" "Work" "Hobbies")
+DIRS=("~/Pictures/Vacation2022" "~/Pictures/Vacation2023" "~/Pictures/Family")
+OUTPUT="~/Pictures/Organized"
 
-for collection in "${collections[@]}"; do
-    photo-organizer ~/Pictures/$collection ~/Pictures/Organized/$collection --recursive
+for DIR in "${DIRS[@]}"; do
+    echo "Processing $DIR..."
+    photo-organizer "$DIR" "$OUTPUT" --recursive
 done
+
+echo "All directories processed!"
 ```
 
-### Example 5: Integration with Other Tools
+### Scheduling Regular Organization
 
-Use Photo Organizer as part of a larger workflow:
+You can use cron (Linux/macOS) or Task Scheduler (Windows) to run Photo Organizer regularly:
+
+#### Linux/macOS (cron)
+
+Add to crontab (`crontab -e`):
+```
+# Run every Sunday at 2:00 AM
+0 2 * * 0 photo-organizer ~/Pictures ~/Pictures/Organized --recursive
+```
+
+#### Windows (PowerShell)
+
+```powershell
+# Create a scheduled task to run weekly
+$action = New-ScheduledTaskAction -Execute "photo-organizer.exe" -Argument "C:\Users\Username\Pictures C:\Users\Username\Pictures\Organized --recursive"
+$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At 2am
+Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "Organize Photos" -Description "Weekly photo organization"
+```
+
+## Integration Examples
+
+### Post-Processing with Custom Scripts
+
+You can use the organized output as input for further processing:
 
 ```bash
 #!/bin/bash
+# Organize photos and then create a web gallery
 
-# Step 1: Backup original photos
-rsync -av ~/Pictures/Original/ ~/Backup/Photos/
+# First, organize the photos
+photo-organizer ~/Pictures/Vacation ~/Pictures/Organized --recursive
 
-# Step 2: Organize photos
-photo-organizer ~/Pictures/Original/ ~/Pictures/Organized/ --recursive
-
-# Step 3: Generate thumbnails for web gallery
-cd ~/Pictures/Organized/
-find . -name "*.jpg" -exec convert {} -resize 200x200 {}.thumb.jpg \;
-
-# Step 4: Create a simple web gallery
-echo "<html><body>" > gallery.html
-find . -name "*.thumb.jpg" -exec echo "<img src=\"{}\">" \; >> gallery.html
-echo "</body></html>" >> gallery.html
+# Then, create a web gallery from the organized photos
+gallery-generator ~/Pictures/Organized ~/WebGallery
 ```
 
-### Example 6: Custom Report Processing
+### Using with Cloud Storage
 
-Extract information from the report for further processing:
+```bash
+#!/bin/bash
+# Organize photos from cloud storage
 
-```python
-import json
-import os
+# First, sync from cloud
+rclone sync remote:Photos ~/Pictures/Cloud
 
-# Assuming the report is saved as JSON
-with open("report.json", "r") as f:
-    report = json.load(f)
+# Then, organize the photos
+photo-organizer ~/Pictures/Cloud ~/Pictures/Organized --recursive
 
-# Extract statistics
-total_files = report["summary"]["total_files"]
-processed_files = report["summary"]["processed_files"]
-folders_created = report["summary"]["folders_created"]
-
-print(f"Processed {processed_files} of {total_files} files")
-print(f"Created {folders_created} folders")
-
-# Extract file mappings
-for mapping in report["file_mappings"]:
-    original = mapping["original_path"]
-    new = mapping["new_path"]
-    category = mapping["category"]
-    print(f"{os.path.basename(original)} -> {category}/{os.path.basename(new)}")
+# Finally, sync back to cloud if desired
+rclone sync ~/Pictures/Organized remote:OrganizedPhotos
 ```
-
-## Tips and Best Practices
-
-1. **Start Small**: When first using Photo Organizer, start with a small collection to understand how it categorizes your photos.
-
-2. **Use Descriptive Output Paths**: Name your output directories descriptively to help you remember what's in them.
-
-3. **Keep Original Files**: Photo Organizer creates copies of your images by default, so your originals are safe.
-
-4. **Experiment with Settings**: Try different similarity thresholds and category depths to find what works best for your collection.
-
-5. **Use Reports**: Always review the generated reports to understand how your photos were organized.
-
-6. **Regular Organization**: Run Photo Organizer regularly on new photos rather than waiting until you have thousands to process.
-
-7. **Combine with Backup Strategy**: Use Photo Organizer as part of a comprehensive backup and organization strategy.
-
-8. **Pre-filter Large Collections**: For very large collections, consider pre-filtering by date or other criteria before organizing.

@@ -2,6 +2,48 @@
 
 This guide provides information for developers who want to contribute to the Photo Organizer project or extend its functionality.
 
+## Project Structure
+
+```
+photo_organizer/
+├── __init__.py
+├── main.py                 # Entry point
+├── core.py                 # Core application logic
+├── state.py                # Application state management
+├── parallel.py             # Parallel processing utilities
+├── models/                 # Data models
+│   ├── __init__.py
+│   ├── image.py            # Image model
+│   ├── category.py         # Category model
+│   └── category_tree.py    # Category hierarchy
+├── services/               # Business logic services
+│   ├── __init__.py
+│   ├── analysis.py         # Image analysis service
+│   ├── categorization.py   # Image categorization service
+│   ├── file_operations.py  # File operations service
+│   ├── file_system_manager.py  # File system management
+│   ├── file_mapping.py     # Original to new file mapping
+│   ├── geolocation.py      # Geolocation services
+│   ├── image_format.py     # Image format detection
+│   ├── metadata_extractor.py  # Metadata extraction
+│   ├── reporting.py        # Report generation
+│   └── vision/             # Computer vision services
+│       ├── __init__.py
+│       ├── base.py         # Base vision service
+│       ├── detection.py    # Object detection
+│       ├── similarity.py   # Image similarity
+│       └── tensorflow.py   # TensorFlow implementation
+└── ui/                     # User interfaces
+    ├── __init__.py
+    ├── cli_parser.py       # Command-line argument parser
+    ├── cli_progress.py     # Command-line progress reporting
+    ├── gui_app.py          # GUI application
+    ├── file_selection.py   # File selection UI
+    ├── config_dialog.py    # Configuration dialog
+    ├── progress_dialog.py  # Progress dialog
+    └── state_monitor.py    # UI state monitoring
+```
+
 ## Development Environment Setup
 
 ### Prerequisites
@@ -13,262 +55,128 @@ This guide provides information for developers who want to contribute to the Pho
 ### Setting Up the Development Environment
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone https://github.com/example/photo-organizer.git
    cd photo-organizer
    ```
 
 2. Create a virtual environment:
-   ```
+   ```bash
    python -m venv venv
    ```
 
 3. Activate the virtual environment:
    - Windows:
-     ```
+     ```bash
      venv\Scripts\activate
      ```
    - macOS/Linux:
-     ```
+     ```bash
      source venv/bin/activate
      ```
 
-4. Install the package in development mode:
-   ```
+4. Install development dependencies:
+   ```bash
    pip install -e ".[dev]"
    ```
 
-   This will install the package and all development dependencies.
-
-### Development Dependencies
-
-The development dependencies are specified in the `setup.py` file under the `extras_require` section:
-
-```python
-extras_require={
-    "dev": [
-        "pytest>=7.0.0",
-        "pytest-mock>=3.8.0",
-        "flake8>=5.0.0",
-        "black>=22.6.0",
-        "isort>=5.10.0",
-        "mypy>=0.971",
-    ],
-}
-```
-
-## Project Structure
-
-The project follows a standard Python package structure:
-
-```
-photo-organizer/
-├── .github/            # GitHub configuration
-├── .kiro/              # Kiro IDE configuration
-├── docs/               # Documentation
-│   ├── examples.md     # Examples and tutorials
-│   ├── installation.md # Installation guide
-│   ├── technical/      # Technical documentation
-│   └── user_guide.md   # User guide
-├── src/                # Source code
-│   └── photo_organizer/ # Main package
-│       ├── models/     # Data models
-│       ├── services/   # Services
-│       ├── ui/         # User interfaces
-│       └── utils/      # Utilities
-├── tests/              # Tests
-│   ├── integration/    # Integration tests
-│   └── unit/           # Unit tests
-├── .flake8             # Flake8 configuration
-├── .gitignore          # Git ignore file
-├── LICENSE             # License file
-├── pyproject.toml      # Project configuration
-├── README.txt          # README file
-├── requirements.txt    # Dependencies
-└── setup.py            # Package setup
-```
-
-## Coding Standards
-
-### Code Style
-
-The project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide with some modifications:
-
-- Line length: 100 characters
-- Docstrings: Google style
-- Imports: Sorted using isort
-- Formatting: Black
-
-### Type Hints
-
-The project uses type hints throughout the codebase. All functions and methods should have type hints for parameters and return values.
-
-### Documentation
-
-All modules, classes, functions, and methods should have docstrings. The project uses Google-style docstrings:
-
-```python
-def example_function(param1: str, param2: int) -> bool:
-    """
-    Short description of the function.
-    
-    Args:
-        param1: Description of param1
-        param2: Description of param2
-        
-    Returns:
-        Description of return value
-        
-    Raises:
-        ValueError: Description of when this error is raised
-    """
-    pass
-```
-
-## Testing
-
 ### Running Tests
 
-To run the tests:
+Run the test suite:
 
-```
+```bash
 pytest
 ```
 
-To run tests with coverage:
+Run tests with coverage:
 
-```
+```bash
 pytest --cov=photo_organizer
 ```
 
-To run specific tests:
+### Code Style
 
-```
-pytest tests/unit/test_core.py
-```
+This project follows PEP 8 style guidelines. Use flake8 to check your code:
 
-### Writing Tests
-
-Tests are organized into unit tests and integration tests:
-
-- Unit tests: Test individual components in isolation
-- Integration tests: Test the interaction between components
-
-Each test file should correspond to a module in the source code. For example, the tests for `photo_organizer/core.py` should be in `tests/unit/test_core.py`.
-
-Test classes should be named `Test{ClassName}` and test methods should be named `test_{method_name}`.
-
-Example:
-
-```python
-class TestApplicationCore:
-    """Tests for the ApplicationCore class."""
-
-    def test_init(self) -> None:
-        """Test initializing an ApplicationCore object."""
-        core = ApplicationCore()
-        assert core is not None
-```
-
-## Code Quality Tools
-
-### Linting
-
-To run the linter:
-
-```
+```bash
 flake8 src tests
 ```
 
-### Formatting
+Use black to format your code:
 
-To format the code:
-
-```
+```bash
 black src tests
-isort src tests
 ```
 
-### Type Checking
+## Architecture
 
-To run the type checker:
+Photo Organizer follows a layered architecture:
 
-```
-mypy src tests
-```
+1. **UI Layer**: Command-line and graphical interfaces
+2. **Application Layer**: Core application logic
+3. **Service Layer**: Business logic services
+4. **Model Layer**: Data models
 
-## Building and Packaging
+### Key Components
 
-### Building the Package
+#### Core Application
 
-To build the package:
+The `ApplicationCore` class in `core.py` is the main entry point for the application logic. It coordinates the various services and manages the application state.
 
-```
-python setup.py sdist bdist_wheel
-```
+#### State Management
 
-### Installing the Package
+The `StateManager` class in `state.py` manages the application state and provides a way for components to observe state changes.
 
-To install the package in development mode:
+#### Services
 
-```
-pip install -e .
-```
+Services implement the business logic of the application:
 
-To install the package with all extras:
+- **ImageAnalysisService**: Analyzes images to extract features
+- **CategorizationService**: Categorizes images based on their content
+- **FileOperationsService**: Handles file operations
+- **ReportingService**: Generates reports
 
-```
-pip install -e ".[all]"
-```
+#### Models
 
-## Continuous Integration
+Models represent the data structures used by the application:
 
-The project uses GitHub Actions for continuous integration. The CI pipeline runs on every push and pull request, and includes:
+- **Image**: Represents an image file with its metadata
+- **Category**: Represents a category for organizing images
+- **CategoryTree**: Represents a hierarchy of categories
 
-- Running tests
-- Checking code style
-- Checking type hints
-- Building the package
+#### User Interfaces
 
-## Release Process
+The application provides two user interfaces:
 
-To release a new version:
+- **Command-line Interface**: Implemented in `cli_parser.py` and `cli_progress.py`
+- **Graphical User Interface**: Implemented in `gui_app.py` and related files
 
-1. Update the version number in `src/photo_organizer/__init__.py`
-2. Update the changelog
-3. Create a new git tag
-4. Push the tag to GitHub
-5. Build and upload the package to PyPI
-
-## Extension Points
+## Extending Photo Organizer
 
 ### Adding a New Vision Service
 
 To add a new vision service:
 
-1. Create a new class that inherits from `VisionService` in `photo_organizer/services/vision/`
+1. Create a new class that inherits from `VisionServiceBase` in `services/vision/base.py`
 2. Implement the required methods
-3. Register the service in `photo_organizer/services/vision/__init__.py`
+3. Register the service in `services/vision/__init__.py`
 
 Example:
 
 ```python
-from photo_organizer.services.vision.base import VisionService
+from photo_organizer.services.vision.base import VisionServiceBase
 
-class MyVisionService(VisionService):
-    """My custom vision service."""
-    
-    def detect_objects(self, image_data: bytes) -> List[Dict[str, Any]]:
-        """
-        Detect objects in an image.
+class MyVisionService(VisionServiceBase):
+    def __init__(self):
+        super().__init__()
+        # Initialize your service
         
-        Args:
-            image_data: Image data as bytes
-            
-        Returns:
-            List of detected objects
-        """
-        # Implementation
+    def detect_objects(self, image):
+        # Implement object detection
+        pass
+        
+    def compute_similarity(self, image1, image2):
+        # Implement similarity computation
         pass
 ```
 
@@ -276,68 +184,85 @@ class MyVisionService(VisionService):
 
 To add a new report format:
 
-1. Add a new value to the `ReportFormat` enum in `photo_organizer/services/reporting.py`
-2. Implement the formatting method in `photo_organizer/services/report_export.py`
+1. Add a new format to the `ReportFormat` enum in `services/reporting.py`
+2. Implement a new report generator method in `ReportingService`
 
 Example:
 
 ```python
-class ReportFormat(Enum):
-    """Supported report formats."""
-    TEXT = auto()
-    HTML = auto()
-    JSON = auto()  # New format
-
-class ReportExportService:
-    # ...
-    
-    def _format_report_json(self, report: Report) -> str:
-        """
-        Format a report as JSON.
-        
-        Args:
-            report: The report to format
-            
-        Returns:
-            The formatted report as a string
-        """
-        # Implementation
-        pass
+def generate_xml_report(self, output_path, file_mappings, errors):
+    # Implement XML report generation
+    pass
 ```
 
-## Troubleshooting
+### Adding a New UI
 
-### Common Development Issues
+To add a new user interface:
 
-#### Import Errors
+1. Create a new module in the `ui` package
+2. Implement the interface using the `StateManager` to observe application state
+3. Use the `ApplicationCore` to perform operations
 
-If you get import errors, make sure:
+## Building and Packaging
 
-1. The virtual environment is activated
-2. The package is installed in development mode
-3. The module is in the Python path
+### Building a Wheel Package
 
-#### Test Failures
+```bash
+python -m build
+```
 
-If tests fail:
+### Building Standalone Executables
 
-1. Check that all dependencies are installed
-2. Check that the code is compatible with the test environment
-3. Check that the test is correctly set up
+The project uses PyInstaller to create standalone executables:
 
-#### Type Checking Errors
+```bash
+python -m pyinstaller pyinstaller/photo_organizer.spec
+```
 
-If type checking fails:
+Or use the build script:
 
-1. Check that all type hints are correct
-2. Check that all imports are correct
-3. Check that all dependencies have type hints
+```bash
+python pyinstaller/build.py
+```
 
-## Getting Help
+## Release Process
 
-If you need help with development:
+1. Update version number in `__init__.py`
+2. Update CHANGELOG.md
+3. Create a new git tag:
+   ```bash
+   git tag -a v1.0.0 -m "Version 1.0.0"
+   ```
+4. Build the package:
+   ```bash
+   python -m build
+   ```
+5. Upload to PyPI:
+   ```bash
+   python -m twine upload dist/*
+   ```
+6. Create a GitHub release with the built executables
 
-1. Check the [documentation](https://example.com/photo-organizer/docs)
-2. Search for similar issues in the [issue tracker](https://github.com/example/photo-organizer/issues)
-3. Ask a question in the [discussions](https://github.com/example/photo-organizer/discussions)
-4. Contact the maintainers
+## Troubleshooting Development Issues
+
+### Common Issues
+
+1. **Import errors**:
+   - Make sure you've installed the package in development mode
+   - Check that you're running from the correct virtual environment
+
+2. **Test failures**:
+   - Check that all dependencies are installed
+   - Look for specific error messages in the test output
+
+3. **Build failures**:
+   - Check that PyInstaller is installed
+   - Ensure all dependencies are correctly specified in setup.py
+
+### Getting Help
+
+If you encounter issues not covered here:
+
+1. Check the existing issues on GitHub
+2. Ask for help in the developer chat
+3. Submit a new issue with detailed information about the problem

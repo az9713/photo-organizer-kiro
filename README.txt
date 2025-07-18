@@ -1,95 +1,67 @@
 # Photo Organizer
 
-An application to intelligently organize and rename image files based on their content using computer vision techniques.
+Photo Organizer is an intelligent application that organizes and categorizes your image collection using computer vision and machine learning techniques.
 
 ## Features
 
-- Analyzes images using computer vision to identify content
-- Groups similar images together
-- Creates logical folder structures with descriptive names
-- Supports various image formats including JPEG, PNG, GIF, TIFF, BMP, and WebP
-- Provides both CLI and GUI interfaces
-- Generates comprehensive reports of the reorganization process
+- **Intelligent Categorization**: Automatically categorizes images based on content
+- **Duplicate Detection**: Identifies similar or duplicate images
+- **Metadata Extraction**: Extracts and uses EXIF metadata for organization
+- **Geolocation**: Organizes images by location when GPS data is available
+- **Customizable**: Adjust similarity thresholds and categorization depth
+- **Multiple Interfaces**: Command-line and graphical user interfaces
+- **Comprehensive Reports**: Generates detailed reports of the organization process
+- **Parallel Processing**: Optimized performance with multi-threading support
 
-## Installation
+## Quick Start
 
-### Prerequisites
+### Installation
 
-- Python 3.9 or higher
-- pip package manager
-
-### Install from source
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/example/photo-organizer.git
-   cd photo-organizer
-   ```
-
-2. Create a virtual environment:
-   ```
-   python -m venv venv
-   ```
-
-3. Activate the virtual environment:
-   - Windows:
-     ```
-     venv\Scripts\activate
-     ```
-   - macOS/Linux:
-     ```
-     source venv/bin/activate
-     ```
-
-4. Install the package in development mode:
-   ```
-   pip install -e .
-   ```
-
-## Usage
-
-### Command Line Interface
-
-```
-photo-organizer <input_path> <output_path> [options]
+```bash
+pip install photo-organizer
 ```
 
-- `input_path`: Path to input file or directory containing images to organize
-- `output_path`: Path to output directory where organized images will be stored
+### Basic Usage
 
-Options:
-- `--gui`: Launch the graphical user interface
-
-### Graphical User Interface
-
-Run the application with the `--gui` flag:
-
+```bash
+photo-organizer ~/Pictures/Vacation ~/Pictures/Organized
 ```
+
+### GUI Usage
+
+```bash
 photo-organizer --gui
 ```
 
-## Development
+## Documentation
 
-### Running Tests
+- [Quick Start Guide](docs/quick_start.md)
+- [User Guide](docs/user_guide.md)
+- [Installation Guide](docs/installation.md)
+- [Examples](docs/examples.md)
+- [Technical Documentation](docs/technical/)
 
-```
-pytest
-```
+## Requirements
 
-### Code Formatting
-
-```
-black src tests
-isort src tests
-```
-
-### Linting
-
-```
-flake8 src tests
-mypy src tests
-```
+- Python 3.9 or higher
+- Dependencies listed in requirements.txt
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Acknowledgments
+
+- TensorFlow for computer vision capabilities
+- PyQt6 for the graphical user interface
+- All contributors who have helped with the development
