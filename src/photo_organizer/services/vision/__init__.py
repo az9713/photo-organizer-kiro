@@ -9,6 +9,11 @@ from photo_organizer.services.vision.base import (
     ObjectInfo,
     SceneInfo,
 )
+from photo_organizer.services.vision.detection import (
+    DetectionService,
+    ObjectDetector,
+    SceneDetector,
+)
 from photo_organizer.services.vision.tensorflow import TensorFlowVisionService
 
 __all__ = [
@@ -18,4 +23,7 @@ __all__ = [
     "ObjectInfo",
     "SceneInfo",
     "FaceInfo",
+    "ObjectDetector",
+    "SceneDetector",
+    "DetectionService",
 ]
