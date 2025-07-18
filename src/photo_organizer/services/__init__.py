@@ -2,6 +2,12 @@
 Services for the Photo Organizer application.
 """
 
+from photo_organizer.services.analysis import (
+    AnalysisError,
+    DefaultImageAnalysisEngine,
+    ImageAnalysisEngine,
+    ImageAnalysisService,
+)
 from photo_organizer.services.file_operations import FileOperationResult, FileOperations
 from photo_organizer.services.file_system_manager import (
     DefaultFileSystemManager,
@@ -50,4 +56,8 @@ __all__ = [
     "ObjectInfo",
     "SceneInfo",
     "FaceInfo",
+    "ImageAnalysisEngine",
+    "DefaultImageAnalysisEngine",
+    "ImageAnalysisService",
+    "AnalysisError",
 ]

@@ -2,6 +2,8 @@
 Utility functions for the Photo Organizer application.
 """
 
+from photo_organizer.utils.analyze import analyze_image as analyze_image_content
+from photo_organizer.utils.analyze import categorize_images
 from photo_organizer.utils.detect import detect_image_content
 from photo_organizer.utils.format_detector import detect_format
 from photo_organizer.utils.geocode import geocode_coordinates
@@ -17,4 +19,6 @@ __all__ = [
     "detect_image_content",
     "compare_images",
     "find_similar_images",
+    "analyze_image_content",
+    "categorize_images",
 ]
