@@ -1,25 +1,68 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "photo-organizer"
+version = "0.1.0"
+description = "An application to intelligently organize and rename image files"
+readme = "README.txt"
+authors = [
+    {name = "Photo Organizer Team", email = "example@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pillow>=9.0.0",
+    "exifread>=3.0.0",
+    "geopy>=2.2.0",
+    "numpy>=1.22.0",
+    "opencv-python>=4.5.5",
+    "tensorflow>=2.8.0",
+    "scikit-learn>=1.0.2",
+    "PyQt6>=6.2.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "black>=22.1.0",
+    "flake8>=4.0.1",
+    "mypy>=0.931",
+    "isort>=5.10.1",
+    "pre-commit>=2.17.0",
+    "pyinstaller>=5.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/example/photo-organizer"
+"Bug Tracker" = "https://github.com/example/photo-organizer/issues"
+
+[project.scripts]
+photo-organizer = "photo_organizer.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.black]
-line-length = 100
-target-version = ['py39']
+line-length = 88
+target-version = ["py39"]
 include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
 
 [tool.isort]
 profile = "black"
-line_length = 100
-multi_line_output = 3
+line_length = 88
 
 [tool.mypy]
 python_version = "3.9"
@@ -29,9 +72,8 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 
 [[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+module = ["tensorflow.*", "PIL.*", "exifread.*", "geopy.*", "cv2.*", "PyQt6.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
