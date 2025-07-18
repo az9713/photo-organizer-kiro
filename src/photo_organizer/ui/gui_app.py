@@ -187,8 +187,37 @@ class MainWindow(QMainWindow):
     def _on_organize(self) -> None:
         """Handle the Organize action."""
         self.status_label.setText("Organizing images...")
-        # TODO: Implement image organization
-        self.status_label.setText("Ready")
+        
+        # Get selected paths
+        selected_paths = self.file_selection.get_selected_paths()
+        
+        if not selected_paths:
+            self.status_label.setText("No files selected")
+            return
+        
+        # Get output path
+        from PyQt6.QtWidgets import QFileDialog
+        
+        output_path = QFileDialog.getExistingDirectory(
+            self, "Select Output Directory", ""
+        )
+        
+        if not output_path:
+            self.status_label.setText("Output directory selection canceled")
+            return
+        
+        # Get processing options
+        from photo_organizer.ui.config_dialog import load_settings
+        
+        options = load_settings()
+        
+        # Start processing
+        from photo_organizer.ui.progress_dialog import ProgressManager
+        
+        progress_manager = ProgressManager(self)
+        progress_manager.start_processing(selected_paths, output_path, options)
+        
+        self.status_label.setText("Processing complete")
     
     def _on_stop(self) -> None:
         """Handle the Stop action."""
@@ -199,8 +228,16 @@ class MainWindow(QMainWindow):
     def _on_preferences(self) -> None:
         """Handle the Preferences action."""
         self.status_label.setText("Opening preferences...")
-        # TODO: Implement preferences dialog
-        self.status_label.setText("Ready")
+        
+        from photo_organizer.ui.config_dialog import ConfigDialog
+        
+        dialog = ConfigDialog(self)
+        result = dialog.exec()
+        
+        if result == ConfigDialog.DialogCode.Accepted:
+            self.status_label.setText("Preferences updated")
+        else:
+            self.status_label.setText("Preferences unchanged")
     
     def _on_about(self) -> None:
         """Handle the About action."""
