@@ -8,6 +8,14 @@ from photo_organizer.services.analysis import (
     ImageAnalysisEngine,
     ImageAnalysisService,
 )
+from photo_organizer.services.categorization import (
+    CategorizationAlgorithm,
+    CategorizationError,
+    CategorizationService,
+    ContentBasedCategorization,
+    HierarchicalClustering,
+    HybridCategorization,
+)
 from photo_organizer.services.file_operations import FileOperationResult, FileOperations
 from photo_organizer.services.file_system_manager import (
     DefaultFileSystemManager,
@@ -60,4 +68,10 @@ __all__ = [
     "DefaultImageAnalysisEngine",
     "ImageAnalysisService",
     "AnalysisError",
+    "CategorizationAlgorithm",
+    "ContentBasedCategorization",
+    "HierarchicalClustering",
+    "HybridCategorization",
+    "CategorizationService",
+    "CategorizationError",
 ]
