@@ -119,14 +119,52 @@ For users who prefer not to install Python, we provide standalone executables:
 
 Photo Organizer depends on several libraries for image processing and computer vision. Most dependencies are installed automatically, but some may require additional steps:
 
-### TensorFlow with GPU Support (Optional)
+### TensorFlow Installation
+
+TensorFlow is a critical dependency for the image analysis features. Here are important considerations for installing TensorFlow:
+
+#### TensorFlow Version Compatibility
+
+For Windows users:
+- TensorFlow 2.10 is the last version that supports native GPU on Windows
+- For newer versions, use WSL2 or the CPU-only version
+
+```bash
+# For Windows with GPU support (recommended)
+pip install "tensorflow<2.11"
+
+# For CPU-only (all platforms)
+pip install tensorflow
+```
+
+#### NumPy Compatibility
+
+TensorFlow has specific NumPy version requirements:
+- TensorFlow 2.10 works best with NumPy 1.24.x (not compatible with NumPy 2.x)
+- If you encounter errors about NumPy, downgrade to a compatible version:
+
+```bash
+pip install numpy==1.24.3
+```
+
+#### Visual C++ Redistributable Requirement
+
+On Windows, TensorFlow requires Microsoft Visual C++ Redistributable:
+1. Download and install [Microsoft Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+2. Restart your computer after installation
+
+#### TensorFlow with GPU Support (Optional)
 
 For faster image analysis, you can install TensorFlow with GPU support:
 
 1. Install CUDA and cuDNN following the [TensorFlow GPU guide](https://www.tensorflow.org/install/gpu)
-2. Install TensorFlow with GPU support:
+2. For Windows, use:
    ```
-   pip install tensorflow-gpu
+   pip install "tensorflow<2.11"
+   ```
+3. For Linux/macOS, use:
+   ```
+   pip install tensorflow[and-cuda]
    ```
 
 ### PyQt6 on Linux
