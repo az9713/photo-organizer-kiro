@@ -40,6 +40,7 @@ photo-organizer --gui
 - [Installation Guide](docs/installation.md)
 - [Examples](docs/examples.md)
 - [Technical Documentation](docs/technical/)
+- [Development Notes](docs/development_notes.md)
 
 ## Requirements
 
@@ -64,4 +65,12 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - TensorFlow for computer vision capabilities
 - PyQt6 for the graphical user interface
+- Kiro AI assistant for development support and code generation
+- Model Context Protocol (MCP) servers:
+  - Context7 for documentation access
+  - Brave Search for technical issue resolution
+  - Bright Data for web data extraction
+  - Sequential Thinking for structured problem-solving
+  - Basic Memory for knowledge management
+  - Fetch for URL content retrieval
 - All contributors who have helped with the development
